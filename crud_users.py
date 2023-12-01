@@ -4,20 +4,18 @@ from permissao import criar_arquivo_banco_usuarios
 #ADICIONANDO USUARIO
 def adicionar_usuario(matricula, nome):
     try:
+        print(f"Adicionando usuário ao banco: Matrícula: {matricula}, Nome: {nome}")
+
         if not matricula or not nome:
             print("Matrícula e nome devem ser fornecidos.")
             return False
-         # Verificar se a matrícula já existe no banco
+        
+        path_arquivo = os.path.join(caminho_banco_usuarios, 'users.txt')
+##################VERIFICANDO SE EXISTE USUARIO NO BANCO##################
         if matricula_existe(matricula):
             print("Matrícula já existe. Não foi possível adicionar o usuário.")
             return False
-        path_arquivo = os.path.join(caminho_banco_usuarios, 'users.txt')
-
-##################VERIFICANDO SE EXISTE USUARIO NO BANCO##################
-        if matricula_existe(matricula):
-                print("Matrícula já existe. Não foi possível adicionar o usuário.")
-                return False
-        
+        # Teste direto da função adicionar_usuario com uma matrícula que você tem certeza que não está no arquivo
         with open(path_arquivo, 'a') as arquivo:
             arquivo.write(f"{matricula},{nome}\n")
         print("Usuário adicionado com sucesso.")
@@ -30,16 +28,26 @@ def matricula_existe(matricula):
     try:
         path_arquivo = os.path.join(caminho_banco_usuarios, 'users.txt')
         with open(path_arquivo, 'r') as arquivo:
-            linhas = arquivo.readlines()
-            for linha in linhas[1:]:
-                matricula_existente, _ = linha.strip().split(',')
-                if matricula_existente == matricula:
+            for linha in arquivo:
+                if ',' not in linha:
+                    continue
+            
+            
+                matricula_existente = linha.split(',')[0].strip()
+                print(f"Matrícula existente: {matricula_existente}, Matrícula procurada: {matricula}")
+                print(f"matricula_existe = {type(matricula_existente)} e matricula {type(matricula)} ")
+                if int(matricula_existente) == matricula:
                     return True
-        return False
+
+
+            # Se a matrícula não foi encontrada, imprime a mensagem e retorna False
+            print("Matricula nao encontrada")
+            return False
+
+ 
     except Exception as e:
         print(f"Erro ao verificar se a matrícula existe: {str(e)}")
         return False
-
 def listar_usuarios():
     try:
         path_arquivo = os.path.join(caminho_banco_usuarios, 'users.txt')

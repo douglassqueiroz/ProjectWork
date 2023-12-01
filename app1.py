@@ -19,8 +19,34 @@ from permissao import verificar_permissao_pasta
 
 @app.route('/')
 def index():
-    #return render_template('index.html')
-    return "hello, world"
+    return render_template('index.html')
+    #return "hello, world"
+
+
+################CRIANDO O BACKEND - SALVANDO AS FOTOS###################3
+
+camera = cv2.VideoCapture(0)
+
+def gen_frames():
+    #global frame, lock
+    while True:
+        success, frame = camera.read()
+        if not success:
+            break
+        else:
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+        yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+        
+        
+@app.route('/video_feed')
+def video_feed():
+    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+################CRIANDO O BACKEND - SALVANDO AS FOTOS###################
+
+
+
 # Rota para salvar a foto
 @app.route('/save_photo', methods=['POST'])
 def save_photo():
@@ -61,21 +87,51 @@ def create_user():
 
         # Verificar se a matrícula e o nome são fornecidos e válidos
         if not matricula or not nome:
-            print("Matrícula e nome devem ser fornecidos.")
-            return jsonify(success=False, error="Matrícula e nome são obrigatórios.")
-        print("Continuando com a adição do usuário ao banco.")
-        if matricula_existe(matricula):
-            print(f'a matricula {matricula} ja existe no banco')
-            return jsonify(success=False, error="Matrícula já existe no banco.")
-        # Adicionar o usuário ao banco de dados
-        adicionar_usuario(matricula, nome)        
-        return redirect(url_for('create_user'))
+            print("Matricula e nome devem ser fornecidos.")
+            return jsonify(success=False, error="Matricula e nome são obrigatórios.")
         
+        if matricula_existe(matricula):
+            print("Matricula ja existe no banco")
+            return jsonify(success=True, error="Matrícula já existe no banco.")
+
+        
+        # Adicionar o usuário ao banco de dados
+        adicionar_usuario(matricula, nome)
+        return jsonify(success=True, message="Usuário adicionado com sucesso.")
+
     except Exception as e:
         error_message = str(e)
         print(f"Erro ao criar o usuário: {error_message}")
         return jsonify(success=False, error=error_message)
-    
+##############VERIFICANDO SE MATRICULA EXISTE PARA MOSTRAR AO USUARIO##############
+@app.route('/verificar_matricula/<matricula>', methods=['GET'])
+def verificar_matricula_route(matricula):
+    try:
+        # Chame a função verificar_matricula e retorne se a matrícula existe
+        matricula_existe_resultado = matricula_existe(matricula)
+        return jsonify(matriculaExistente=matricula_existe_resultado)
+
+    except Exception as e:
+        error_message = str(e)
+        return jsonify(matriculaExistente=False, error=error_message)
+
+# @app.route('/verificar_matricula/<matricula>', methods=['GET'])
+# def verificar_matricula(matricula):
+#     try:
+        
+#         # Chame a função matricula_existe e retorne se a matrícula existe
+#         print("A matricula está sendo verificada nesse momento.")
+#         matricula_existe_resultado = matricula_existe(matricula)#MATRICULA VINDO DO CRUD_USERS EM BOOLEANO
+#         print(f'Tipo de dado recebido em matricula_existe_resultado: {type(matricula_existe_resultado)}')
+#         print(f"Matrícula recebida: {matricula}")
+        
+#         return jsonify(matriculaExistente=matricula_existe_resultado)
+#     except Exception as e:
+#         error_message = str(e)
+#         print(f"Erro ao verificar a matrícula: {error_message}")
+#         return jsonify(matriculaExistente=False, error=error_message)
+##############VERIFICANDO SE MATRICULA EXISTE PARA MOSTRAR AO USUARIO##############
+
 @app.route('/listar_usuarios', methods=['GET'])
 def get_usuarios():
     usuarios = listar_usuarios()
@@ -83,21 +139,6 @@ def get_usuarios():
         return jsonify(success=True, usuarios=usuarios)
     else:
         return jsonify(success=False, error="Erro ao obter usuários do banco de dados.")
-
-##############VERIFICANDO SE MATRICULA EXISTE PARA MOSTRAR AO USUARIO##############
-@app.route('/verificar_matricula/<matricula>', methods=['GET'])
-def verificar_matricula(matricula):
-    try:
-        # Chame a função matricula_existe e retorne se a matrícula existe
-        matricula_existe_resultado = matricula_existe(matricula)
-        print(f"Matrícula recebida: {matricula}")
-        
-        return jsonify(matriculaExistente=matricula_existe_resultado)
-    except Exception as e:
-        error_message = str(e)
-        print(f"Erro ao verificar a matrícula: {error_message}")
-        return jsonify(matriculaExistente=False)
-##############VERIFICANDO SE MATRICULA EXISTE PARA MOSTRAR AO USUARIO##############
 
 
 
@@ -113,6 +154,7 @@ def delete_user(matricula):
 
         if sucesso:
             print(f"Usuário com a matrícula {matricula} removido com sucesso.")
+            print(f'Tipo de dado recebido em verificar_matricula: {type(matricula)}')
             return jsonify(success=True)
         else:
             return jsonify(success=False, error="Erro ao remover usuário.")

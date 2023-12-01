@@ -1,10 +1,12 @@
+// Verificando se a API da câmera está disponível
+
 (function () {
     if (!("mediaDevices" in navigator) || !("getUserMedia" in navigator.mediaDevices)) {
         alert("Camera API is not available in your browser");
         return;
     }
 
-    // get page elements
+    // Obtendo os elementos da página
     const video = document.querySelector("#video");
     const btnPlay = document.querySelector("#btnPlay");
     const btnPause = document.querySelector("#btnPause");
@@ -14,7 +16,7 @@
     const canvas = document.querySelector("#canvas");
     const devicesSelect = document.querySelector("#devicesSelect");
 
-    // video constraints
+    // Configurando a câmera
     const constraints = {
         video: {
             width: {
@@ -30,49 +32,82 @@
         },
     };
 
-    // use front face camera
+    // Flag para a câmera frontal e traseira
     let useFrontCamera = true;
 
-    // current video stream
+    // Stream de vídeo atual
     let videoStream;
 
-    // handle events
+    // Manipulação de eventos
+    // Função para iniciar a reprodução do vídeo
     function playVideo() {
-        console.lot("Verificando a inicialização do vídeo.")
         video.play();
         btnPlay.classList.add("is-hidden");
         btnPause.classList.remove("is-hidden");
     }
 
+    // Função para pausar o vídeo
     function pauseVideo() {
-        console.lot("Verificando a pausa do vídeo.")
         video.pause();
         btnPause.classList.add("is-hidden");
         btnPlay.classList.remove("is-hidden");
     }
 
+    // Adiciona ouvintes de eventos aos botões de play e pause
     btnPlay.addEventListener("click", playVideo);
     btnPause.addEventListener("click", pauseVideo);
 
-    // take screenshot
+    // Função para tirar uma captura de tela
     btnScreenshot.addEventListener("click", function () {
-        console.log("Verificando se a foto está sendo feita corretamente")
         const img = document.createElement("img");
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         canvas.getContext("2d").drawImage(video, 0, 0);
         img.src = canvas.toDataURL("image/png");
         screenshotsContainer.prepend(img);
+    // Chamando a função para salvar a foto    
+        savePhoto(canvas.toDataURL("image/png"))
     });
 
-    // switch camera
+//USANDO JSON//
+    // Função para salvar a foto
+    function savePhoto(dataURL) {
+    // Cria um objeto de solicitação HTTP
+    const xhr = new XMLHttpRequest();
+
+    // Define o tipo de solicitação, a URL e se será assíncrono
+    xhr.open("POST", "/save_photo", true);
+
+    // Define o cabeçalho da solicitação
+    xhr.setRequestHeader("Content-Type", "application/json");
+
+    // O que fazer quando a resposta da solicitação estiver pronta
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            console.log("Photo saved successfully!");
+        } else {
+            console.error("Failed to save photo. Status: " + xhr.status);
+        }
+    };
+
+    // O que fazer em caso de erro na solicitação
+    xhr.onerror = function () {
+        console.error("Error occurred during photo saving.");
+    };
+
+    // Envia a solicitação com os dados da foto
+    xhr.send(JSON.stringify({ photoData: dataURL }));
+}
+
+    
+
+    // Adiciona um ouvinte de evento ao botão de mudança de câmera
     btnChangeCamera.addEventListener("click", function () {
-        console.log("Change camera button clicked");
         useFrontCamera = !useFrontCamera;
         initializeCamera();
     });
 
-    // stop video stream
+    // Função para parar o stream de vídeo
     function stopVideoStream() {
         if (videoStream) {
             videoStream.getTracks().forEach((track) => {
@@ -81,12 +116,13 @@
         }
     }
 
-    // initialize
+    // Inicialização da câmera
     async function initializeCamera() {
         stopVideoStream();
         constraints.video.facingMode = useFrontCamera ? "user" : "environment";
 
         try {
+            // Obtém o stream de vídeo da câmera
             videoStream = await navigator.mediaDevices.getUserMedia(constraints);
             video.srcObject = videoStream;
             playVideo(); // Inicia automaticamente a reprodução ao trocar de câmera
@@ -96,4 +132,5 @@
     }
 
     initializeCamera();
+
 })();
