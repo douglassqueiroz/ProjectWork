@@ -1,7 +1,7 @@
 import os
-
+caminho_pasta_usuarios = r'C:\Users\Administrador\Desktop\projeto_Adar\ambiente_virtual_python\backend\pasta_usuarios'
 caminho_banco_usuarios = r'C:\Users\Administrador\Desktop\projeto_Adar\ambiente_virtual_python\backend\banco_usuarios_teste'
-
+caminho = r'C:\Users\Administrador\Desktop\projeto_Adar\ambiente_virtual_python\backend\pasta_usuarios'
 def verificar_permissao_pasta(caminho):
     try:
         #Criar o diretório se não existir

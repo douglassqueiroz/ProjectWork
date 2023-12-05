@@ -171,8 +171,8 @@ def update_user(matricula_antiga):
         dados_json = request.json
         nova_matricula = dados_json.get('nova_matricula')
         novo_nome = dados_json.get('novo_nome')
-        print(f"Matrícula antiga: {matricula_antiga}")
-        print(f"Matrícula nova: {nova_matricula}")
+        # print(f"Matrícula antiga: {matricula_antiga}")
+        # print(f"Matrícula nova: {nova_matricula}")
 
         # Atualizar o usuário no banco de dados
         sucesso = atualizar_usuario(matricula_antiga, nova_matricula, novo_nome)
