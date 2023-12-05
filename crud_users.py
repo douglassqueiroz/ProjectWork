@@ -83,7 +83,8 @@ def remover_usuario(matricula):
         path_arquivo = os.path.join(caminho_banco_usuarios, 'users.txt')
         with open(path_arquivo, 'r') as arquivo:
             linhas = arquivo.readlines()
-
+        matricula_encontrada = False  # Flag para indicar se a matrícula foi encontrada
+        
         with open(path_arquivo, 'w') as arquivo:
             arquivo.write(linhas[0])  # Escreve o cabeçalho
 
@@ -91,8 +92,13 @@ def remover_usuario(matricula):
                 if matricula not in linha:
                     arquivo.write(linha)
 
-        print(f"Usuário com a matrícula {matricula} removido com sucesso.")
-        return True
+        if matricula_encontrada:
+            print(f"DEBUG: Usuário com a matrícula {matricula} removido com sucesso.")
+            return True
+        else:
+            print(f"DEBUG: Matrícula {matricula} não encontrada. Nenhum usuário removido.")
+            return False
+
     except Exception as e:
         print(f"Erro ao remover usuário: {str(e)}")
         return False
@@ -105,12 +111,18 @@ def atualizar_usuario(matricula_antiga, nova_matricula, novo_nome):
         with open(path_arquivo, 'r') as arquivo:
             linhas = arquivo.readlines()
 
+
         with open(path_arquivo, 'w') as arquivo:
             arquivo.write(linhas[0])  # Escreve o cabeçalho
+        #ADICIONANDO A VERIFICAÇÃO DE MATRICULA
+            matricula_encontrada = False  # Flag para indicar se a matrícula foi encontrada
+        
             for linha in linhas[1:]:
                 matricula, nome_antigo= linha.strip().split(',')
                 print(f"DEBUG: Matricula antiga: {matricula_antiga}")
-                print(f"DEBUG: Nome antigo: {nome_antigo}")                
+                print(f"DEBUG: Nome antigo: {nome_antigo}")   
+                if int(matricula) == int(matricula_antiga):
+                    matricula_encontrada = True             
                 if int(matricula) == int(matricula_antiga):
                     # Atualiza a linha com os novos dados
                     print(f"DEBUG: Nova Matricula: {nova_matricula}")
@@ -122,13 +134,14 @@ def atualizar_usuario(matricula_antiga, nova_matricula, novo_nome):
                     matricula = nova_matricula  # Atualiza matricula
                  
                 arquivo.write(linha)
-
-            if 'matricula' is not None:
+            if matricula_encontrada:
                 print(f"DEBUG: O tipo de matricula recebida é {type(matricula)}")
+                print(f"DEBUG: Usuário com a matrícula {matricula_antiga} atualizado com sucesso.")
+                return True
+            else:
+                print(f"DEBUG: Matrícula {matricula_antiga} não encontrada. Nenhum usuário atualizado.")
+                return {"error": "Matrícula não encontrada.", "success": False}
 
-        print(f"DEBUG: Usuário com a matrícula {matricula_antiga} atualizado com sucesso.")
-
-        return True
     except Exception as e:
         print(f"Erro ao atualizar usuário: {str(e)}")
         return False
