@@ -190,6 +190,7 @@ def update_user(matricula_antiga):
 
 
 if __name__ == '__main__':
+    app.run(host="0.0.0.0", port=5000, debug=True)
+    """, ssl_context=(cert_path, key_path)"""
     #cert_path = r'C:\Users\Administrador\Desktop\projeto_Adar\ambiente_virtual_python\backend\certificado.pem'
     #key_path = r'C:\Users\Administrador\Desktop\projeto_Adar\ambiente_virtual_python\backend\chave-privada.pem'
-    app.run(host="0.0.0.0", port=5000, debug=True""", ssl_context=(cert_path, key_path)""")

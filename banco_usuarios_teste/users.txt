@@ -1,2 +1,3 @@
-#O arquivo de banco de usuarios ja existe.
+# Arquivo de banco de usuários
+1,teste1
 2,teste2

@@ -17,7 +17,7 @@ def verificar_permissao_pasta(caminho):
         return True
     except PermissionError:
         return False
-    
+
 def criar_arquivo_banco_usuarios():
     try:
         # Cria o diretório se não existir

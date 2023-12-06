@@ -3,6 +3,7 @@ version: '3'
 services:
   flask-app:
     build:
-      context: ./flask-app
+      context: .
+      dockerfile: Dockerfile.yaml
     ports:
       - "5000:5000"
