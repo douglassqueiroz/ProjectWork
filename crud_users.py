@@ -91,7 +91,15 @@ def remover_usuario(matricula):
             for linha in linhas[1:]:
                 if matricula not in linha:
                     arquivo.write(linha)
-
+                else:
+                    matricula, nome_remover = linha.strip().split(',')
+                    # Exclui a pasta do usuário correspondente
+                    pasta_usuario = os.path.join(caminho_pasta_usuarios, f'{matricula}')
+                    print(f"DEBUG: {pasta_usuario}")
+                    if os.path.exists(pasta_usuario):
+                        os.rmdir(pasta_usuario)
+                        print(f"Pasta do usuário removida: {pasta_usuario}")
+  
         if matricula_encontrada:
             print(f"DEBUG: Usuário com a matrícula {matricula} removido com sucesso.")
             return True
@@ -130,9 +138,18 @@ def atualizar_usuario(matricula_antiga, nova_matricula, novo_nome):
 
                     linha = f"{nova_matricula},{str(novo_nome)}\n"
                     print(f"DEBUG: Linha atualizada: {linha}")
-
+        
                     matricula = nova_matricula  # Atualiza matricula
-                 
+                    # #ATUALIZANDO O NOME DA PASTA
+                    pasta_antiga = os.path.join(caminho_pasta_usuarios, f"{matricula_antiga}")
+                    pasta_nova = os.path.join(caminho_pasta_usuarios, f"{nova_matricula}")
+                    try:
+                        os.rename(pasta_antiga, pasta_nova)
+                        print(f"Pasta do usuário renomeada de {pasta_antiga} para {pasta_nova}")
+                    except FileNotFoundError:
+                        print(f"DEBUG: Pasta do usuário não encontrada: {pasta_antiga}")
+
+                      
                 arquivo.write(linha)
             if matricula_encontrada:
                 print(f"DEBUG: O tipo de matricula recebida é {type(matricula)}")
